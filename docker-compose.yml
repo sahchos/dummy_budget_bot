@@ -6,6 +6,8 @@ services:
       - mongodb
     env_file:
       - .env
+    volumes:
+      - .:/usr/src/app
   mongodb:
     image: mongo:4.0-xenial
     restart: always
