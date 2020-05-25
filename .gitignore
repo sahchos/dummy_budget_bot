@@ -30,3 +30,5 @@ venv/*
 # DB
 *.sql
 *.sqlite3
+
+.env
