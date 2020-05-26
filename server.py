@@ -66,6 +66,23 @@ async def get_today_stats(message: types.Message):
     await message.answer(expense_stats.today_by_categories())
 
 
+@dp.message_handler(commands=['today_pie'])
+async def get_today_stats_pie(message: types.Message):
+    img = expense_stats.today_by_categories_pie()
+    await message.reply_photo(img, caption='Статистика за сегодня')
+
+
+@dp.message_handler(commands=['month'])
+async def get_month_stats(message: types.Message):
+    await message.answer(expense_stats.month_by_categories())
+
+
+@dp.message_handler(commands=['month_pie'])
+async def get_month_stats_pie(message: types.Message):
+    img = expense_stats.month_by_categories_pie()
+    await message.reply_photo(img, caption='Статистика за месяц')
+
+
 @dp.message_handler()
 async def add_expense(message: types.Message):
     """Parse message and add expense"""
