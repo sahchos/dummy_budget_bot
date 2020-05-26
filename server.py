@@ -4,8 +4,10 @@ import logging
 from aiogram import Bot, Dispatcher, executor, types
 from mongoengine import connect
 
+import exceptions
 from models.Category import Category
 from middlewares import AccessMiddleware
+from expenses import expense_service
 
 DB_NAME = os.environ.get('DB_NAME', 'budget_bot')
 DB_HOST = os.environ.get('MONGODB_URI', 'mongodb')
@@ -43,6 +45,32 @@ async def categories_list(message: types.Message):
         ])
     ])
     await message.answer(answer_message)
+
+
+@dp.message_handler(lambda message: message.text.startswith('/del'))
+async def delete_expense(message: types.Message):
+    try:
+        expense_id = message.text.split('/del')[1].replace('_', '-')
+    except IndexError:
+        await message.answer('ID расхода отсутствует')
+        return
+
+    expense_service.delete(expense_id)
+    await message.answer('Удалено')
+
+
+@dp.message_handler()
+async def add_expense(message: types.Message):
+    """Parse message and add expense"""
+    try:
+        expense = expense_service.add(message.text)
+    except (exceptions.InvalidMessage, exceptions.InvalidCategory) as e:
+        await message.answer(str(e))
+        return
+
+    await message.answer(f'Добавлено: {expense.amount}\n'
+                         f'Категория: {expense.category.name}\n'
+                         f'Удалить: /del{expense.get_id_str()}')
 
 
 if __name__ == '__main__':
