@@ -29,7 +29,12 @@ async def welcome(message: types.Message):
     await message.answer('\n'.join([
         'Комманды:',
         'Добавить расход: 1500 дом',
-        '/categories - список доступных категорий'
+        '/categories - список доступных категорий',
+        '/today - статистика расходов за сегодня',
+        '/today_pie - график расходов за сегодня (пирог)',
+        '/month - статистика расходов за текущий месяц',
+        '/month_pie - график расходов за текущий месяц (пирог)',
+        '/current - график планируемого и фактического расхода, текущий месяц',
     ]))
 
 
@@ -81,6 +86,12 @@ async def get_month_stats(message: types.Message):
 async def get_month_stats_pie(message: types.Message):
     img = expense_stats.month_by_categories_pie()
     await message.reply_photo(img, caption='Статистика за месяц')
+
+
+@dp.message_handler(commands=['current'])
+async def get_current_status_chart(message: types.Message):
+    img = expense_stats.month_status()
+    await message.reply_photo(img, caption='Планируемый и фактический расход')
 
 
 @dp.message_handler()

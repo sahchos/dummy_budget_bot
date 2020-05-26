@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from typing import Dict
 
 import matplotlib.pyplot as plt
+from mongoengine import QuerySet
 
 import exceptions
 from models.Category import Category
@@ -47,6 +48,9 @@ class ExpenseService:
 
 
 class ExpenseStats:
+    MONTHLY_BUDGET = 31000
+    DAILY_BUDGET = 1000
+
     def today_by_categories(self) -> str:
         expenses = self._get_today_expenses(total=True)
 
@@ -67,8 +71,65 @@ class ExpenseStats:
     def month_by_categories_pie(self) -> io.BytesIO:
         return self._get_pie(self._get_month_expenses())
 
+    def month_status(self) -> io.BytesIO:
+        """Graph that will show planned and fact curves"""
+        now = datetime.utcnow().date()
+        qs = self._get_range_qs(
+            date_from=now.replace(day=1),
+            date_to=now.replace(
+                day=calendar.monthrange(now.year, now.month)[1]
+            ) + timedelta(days=1)
+        )
+        expenses = qs.aggregate([
+            {
+                '$project': {
+                    'day': {
+                        '$dateToString': {
+                            'format': '%d',
+                            'date': '$date'
+                        }
+                    },
+                    'amount': 1
+                }
+            },
+            {
+                '$group': {
+                    '_id': '$day',
+                    'total': {'$sum': '$amount'}
+                }
+            }
+        ])
+
+        planned_days = [x for x in range(32)]
+        planned_money = [x * self.DAILY_BUDGET for x in range(32)]
+        fact_money = [0 for _ in range(32)]
+        for expense in expenses:
+            fact_money[int(expense['_id'])] = expense['total']
+        for i in range(1, 32):
+            fact_money[i] += fact_money[i - 1]
+
+        plt.plot(planned_days, planned_money, 'b-')
+        plt.plot(planned_days, fact_money, 'k-')
+        plt.axis([0, 31, 0, self.MONTHLY_BUDGET])
+        plt.ylabel('Гривен')
+        plt.xlabel('День')
+        img = io.BytesIO()
+        plt.savefig(img, format='png')
+        plt.close()
+        img.seek(0)
+
+        return img
+
     @staticmethod
-    def _get_expenses_by_categories(date_from: datetime.date,
+    def _get_range_qs(date_from: datetime.date,
+                      date_to: datetime.date) -> QuerySet:
+        return Expense.objects.filter(
+            date__gte=date_from,
+            date__lt=date_to
+        )
+
+    def _get_expenses_by_categories(self,
+                                    date_from: datetime.date,
                                     date_to: datetime.date,
                                     total: bool = False) -> Dict[str, int]:
         """
@@ -78,10 +139,7 @@ class ExpenseStats:
         :param bool total: flag to indicate if Total should be included
         :return dict: {<category_name>: <total>} sorted by total
         """
-        qs = Expense.objects.filter(
-            date__gte=date_from,
-            date__lt=date_to
-        )
+        qs = self._get_range_qs(date_from, date_to)
         result = {
             category['_id']: category['total']
             for category in qs.aggregate([{
