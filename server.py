@@ -161,5 +161,7 @@ if __name__ == '__main__':
         webhook_path='',
         on_startup=on_startup,
         on_shutdown=on_shutdown,
-        skip_updates=True
+        skip_updates=True,
+        host=WEB_HOOK_URL,
+        port=80
     )
