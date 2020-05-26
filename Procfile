@@ -1,1 +1,1 @@
-release: python setup.py && python server.py
+release: python server.py
