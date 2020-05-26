@@ -32,8 +32,11 @@ async def welcome(message: types.Message):
         '/categories - список доступных категорий',
         '/today - статистика расходов за сегодня',
         '/today_pie - график расходов за сегодня (пирог)',
+        '/prev_month - статистика расходов за прошлый месяц',
+        '/prev_month_pie - график расходов за прошлый месяц (пирог)',
         '/month - статистика расходов за текущий месяц',
         '/month_pie - график расходов за текущий месяц (пирог)',
+        '/prev - график планируемого и фактического расхода, прошлый месяц',
         '/current - график планируемого и фактического расхода, текущий месяц',
     ]))
 
@@ -88,10 +91,29 @@ async def get_month_stats_pie(message: types.Message):
     await message.reply_photo(img, caption='Статистика за месяц')
 
 
+@dp.message_handler(commands=['prev_month'])
+async def get_prev_month_stats(message: types.Message):
+    await message.answer(expense_stats.month_by_categories(prev=True))
+
+
+@dp.message_handler(commands=['prev_month_pie'])
+async def get_prev_month_stats_pie(message: types.Message):
+    img = expense_stats.month_by_categories_pie(prev=True)
+    await message.reply_photo(img, caption='Статистика за прошлый месяц')
+
+
 @dp.message_handler(commands=['current'])
 async def get_current_status_chart(message: types.Message):
     img = expense_stats.month_status()
     await message.reply_photo(img, caption='Планируемый и фактический расход')
+
+
+@dp.message_handler(commands=['prev'])
+async def get_prev_status_chart(message: types.Message):
+    img = expense_stats.month_status(prev=True)
+    await message.reply_photo(
+        img, caption='Планируемый и фактический расход за прошый месяц'
+    )
 
 
 @dp.message_handler()

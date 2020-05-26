@@ -58,8 +58,8 @@ class ExpenseStats:
             f'{category}: {expenses[category]}' for category in expenses
         ])
 
-    def month_by_categories(self) -> str:
-        expenses = self._get_month_expenses(total=True)
+    def month_by_categories(self, prev: bool = False) -> str:
+        expenses = self._get_month_expenses(total=True, prev=prev)
 
         return '\n'.join([
             f'{category}: {expenses[category]}' for category in expenses
@@ -68,12 +68,15 @@ class ExpenseStats:
     def today_by_categories_pie(self) -> io.BytesIO:
         return self._get_pie(self._get_today_expenses())
 
-    def month_by_categories_pie(self) -> io.BytesIO:
-        return self._get_pie(self._get_month_expenses())
+    def month_by_categories_pie(self, prev: bool = False) -> io.BytesIO:
+        return self._get_pie(self._get_month_expenses(prev=prev))
 
-    def month_status(self) -> io.BytesIO:
+    def month_status(self, prev: bool = False) -> io.BytesIO:
         """Graph that will show planned and fact curves"""
         now = datetime.utcnow().date()
+        if prev:
+            now = now.replace(day=1) - timedelta(days=1)
+
         qs = self._get_range_qs(
             date_from=now.replace(day=1),
             date_to=now.replace(
@@ -170,8 +173,13 @@ class ExpenseStats:
             total=total
         )
 
-    def _get_month_expenses(self, total: bool = False) -> Dict[str, int]:
+    def _get_month_expenses(self,
+                            total: bool = False,
+                            prev: bool = False) -> Dict[str, int]:
         now = datetime.utcnow().date()
+        if prev:
+            now = now.replace(day=1) - timedelta(days=1)
+
         return self._get_expenses_by_categories(
             date_from=now.replace(day=1),
             date_to=now.replace(
