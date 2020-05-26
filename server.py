@@ -139,7 +139,7 @@ async def add_expense(message: types.Message):
 
 async def on_startup(dp):
     logging.info('Starting...')
-    await bot.set_webhook(WEB_HOOK_URL)
+    await bot.set_webhook(WEB_HOOK_URL, max_connections=1)
 
 
 async def on_shutdown(dp):
@@ -158,9 +158,8 @@ if __name__ == '__main__':
     # db = connect(DB_NAME, host=DB_HOST)
     start_webhook(
         dispatcher=dp,
-        webhook_path=WEB_HOOK_URL,
+        webhook_path='',
         on_startup=on_startup,
         on_shutdown=on_shutdown,
-        skip_updates=True,
-        max_connections=1
+        skip_updates=True
     )
