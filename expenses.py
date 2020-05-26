@@ -198,6 +198,7 @@ class ExpenseStats:
         ax.axis('equal')
         img = io.BytesIO()
         figure.savefig(img, format='png')
+        plt.close()
         img.seek(0)
 
         return img
