@@ -16,6 +16,7 @@ DB_HOST = os.environ.get('MONGODB_URI', 'mongodb')
 API_TOKEN = os.environ.get('API_TOKEN')
 ACCESS_IDS = os.environ.get('ACCESS_IDS', '')
 HEROKU_APP_NAME = os.environ.get('HEROKU_APP_NAME', 'dummybudgetbot')
+PORT = int(os.environ.get('PORT', 80))
 WEB_HOOK_URL = f'https://{HEROKU_APP_NAME}.herokuapp.com'
 
 # Configure logging
@@ -162,5 +163,5 @@ if __name__ == '__main__':
         on_startup=on_startup,
         on_shutdown=on_shutdown,
         skip_updates=True,
-        port=80
+        port=PORT
     )
