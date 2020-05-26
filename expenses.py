@@ -1,9 +1,15 @@
 import re
 from dataclasses import dataclass
+from datetime import datetime, timedelta
+
+from mongoengine import QuerySet
 
 import exceptions
 from models.Category import Category
 from models.Expense import Expense
+
+
+__all__ = ['expense_stats', 'expense_service']
 
 
 class ExpenseService:
@@ -37,4 +43,32 @@ class ExpenseService:
         Expense.objects.filter(id=expense_id).delete()
 
 
+class ExpenseStats:
+    def _get_today_expenses(self) -> QuerySet:
+        return Expense.objects.filter(
+            date__gt=datetime.utcnow().date(),
+            date__lt=datetime.utcnow().date() + timedelta(days=1)
+        )
+
+    def today_by_categories(self) -> str:
+        today_qs = self._get_today_expenses()
+        result = {
+            category['_id']: category['total']
+            for category in today_qs.aggregate([{
+                '$group': {
+                    '_id': '$category',
+                    'total': {'$sum': '$amount'}
+                }
+            }])
+        }
+        categories_by_id = Category.objects.in_bulk(list(result.keys()))
+
+        return '\n'.join([
+            f'Total: {today_qs.sum("amount")}',
+            *[f'{categories_by_id[category].name}: {result[category]}'
+              for category in sorted(result, key=result.get, reverse=True)]
+        ])
+
+
 expense_service = ExpenseService()
+expense_stats = ExpenseStats()

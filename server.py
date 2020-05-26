@@ -7,7 +7,8 @@ from mongoengine import connect
 import exceptions
 from models.Category import Category
 from middlewares import AccessMiddleware
-from expenses import expense_service
+from expenses import expense_service, expense_stats
+
 
 DB_NAME = os.environ.get('DB_NAME', 'budget_bot')
 DB_HOST = os.environ.get('MONGODB_URI', 'mongodb')
@@ -27,6 +28,7 @@ dp.middleware.setup(AccessMiddleware(ACCESS_IDS))
 async def welcome(message: types.Message):
     await message.answer('\n'.join([
         'Комманды:',
+        'Добавить расход: 1500 дом',
         '/categories - список доступных категорий'
     ]))
 
@@ -57,6 +59,11 @@ async def delete_expense(message: types.Message):
 
     expense_service.delete(expense_id)
     await message.answer('Удалено')
+
+
+@dp.message_handler(commands=['today'])
+async def get_today_stats(message: types.Message):
+    await message.answer(expense_stats.today_by_categories())
 
 
 @dp.message_handler()
