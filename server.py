@@ -2,6 +2,7 @@ import os
 import logging
 
 from aiogram import Bot, Dispatcher, executor, types
+from aiogram.utils.executor import start_webhook
 from mongoengine import connect
 
 import exceptions
@@ -14,6 +15,8 @@ DB_NAME = os.environ.get('DB_NAME', 'budget_bot')
 DB_HOST = os.environ.get('MONGODB_URI', 'mongodb')
 API_TOKEN = os.environ.get('API_TOKEN')
 ACCESS_IDS = os.environ.get('ACCESS_IDS', '')
+HEROKU_APP_NAME = os.environ.get('HEROKU_APP_NAME', 'dummybudgetbot')
+WEB_HOOK_URL = f'https://{HEROKU_APP_NAME}.herokuapp.com'
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -119,6 +122,10 @@ async def get_prev_status_chart(message: types.Message):
 @dp.message_handler()
 async def add_expense(message: types.Message):
     """Parse message and add expense"""
+    # TODO: test app wake up with webhook
+    await message.answer(message.text)
+    return
+
     try:
         expense = expense_service.add(message.text)
     except (exceptions.InvalidMessage, exceptions.InvalidCategory) as e:
@@ -130,6 +137,30 @@ async def add_expense(message: types.Message):
                          f'Удалить: /del{expense.get_id_str()}')
 
 
+async def on_startup(dp):
+    logging.info('Starting...')
+    await bot.set_webhook(WEB_HOOK_URL)
+
+
+async def on_shutdown(dp):
+    logging.warning('Shutting down...')
+    # Remove web hook (not acceptable in some cases)
+    await bot.delete_webhook()
+
+    # Close DB connection (if used)
+    await dp.storage.close()
+    await dp.storage.wait_closed()
+
+    logging.warning('Bye!')
+
+
 if __name__ == '__main__':
-    db = connect(DB_NAME, host=DB_HOST)
-    executor.start_polling(dp, skip_updates=True)
+    # db = connect(DB_NAME, host=DB_HOST)
+    start_webhook(
+        dispatcher=dp,
+        webhook_path=WEB_HOOK_URL,
+        on_startup=on_startup,
+        on_shutdown=on_shutdown,
+        skip_updates=True,
+        max_connections=1
+    )
