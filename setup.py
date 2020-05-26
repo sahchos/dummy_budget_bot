@@ -23,13 +23,37 @@ def _create_categories():
                  name="Подписки, телеком",
                  is_base_expenses=True,
                  aliases=[
-                     'subs', 'phone', 'телефон', 'комуналка', 'инет'
+                     'subs', 'phone', 'телефон', 'инет'
                  ]),
         Category(id="house",
                  name="Дом, покупки",
                  is_base_expenses=True,
                  aliases=[
-                     'house', 'ремонт', 'дом', 'покупки'
+                     'house', 'ремонт', 'дом', 'покупки', 'комуналка'
+                 ]),
+        Category(id="transport",
+                 name="Машина, транспорт",
+                 is_base_expenses=True,
+                 aliases=[
+                     'car', 'машина', 'сто', 'то', 'такси', 'проезд'
+                 ]),
+        Category(id="rest",
+                 name="Отдых, поездки, путешествия",
+                 is_base_expenses=True,
+                 aliases=[
+                     'отдых', 'поездки', 'путешествия', 'отпуск'
+                 ]),
+        Category(id="beauty",
+                 name="Красота, уход, здоровье",
+                 is_base_expenses=True,
+                 aliases=[
+                     'beauty', 'красота', 'маник', 'ногти', 'аптека'
+                 ]),
+        Category(id="self-improvement",
+                 name="Саморазвитие",
+                 is_base_expenses=True,
+                 aliases=[
+                     'англ', 'курсы', 'треша', 'треня',
                  ]),
         Category(id="other",
                  name="Прочее",
