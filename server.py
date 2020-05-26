@@ -1,7 +1,7 @@
 import os
 import logging
 
-from aiogram import Bot, Dispatcher, executor, types
+from aiogram import Bot, Dispatcher, types
 from aiogram.utils.executor import start_webhook
 from mongoengine import connect
 
@@ -123,10 +123,6 @@ async def get_prev_status_chart(message: types.Message):
 @dp.message_handler()
 async def add_expense(message: types.Message):
     """Parse message and add expense"""
-    # TODO: test app wake up with webhook
-    await message.answer(message.text)
-    return
-
     try:
         expense = expense_service.add(message.text)
     except (exceptions.InvalidMessage, exceptions.InvalidCategory) as e:
@@ -156,7 +152,7 @@ async def on_shutdown(dp):
 
 
 if __name__ == '__main__':
-    # db = connect(DB_NAME, host=DB_HOST)
+    db = connect(DB_NAME, host=DB_HOST)
     start_webhook(
         dispatcher=dp,
         webhook_path='',
