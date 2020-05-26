@@ -24,7 +24,7 @@ dp.middleware.setup(AccessMiddleware(ACCESS_IDS))
 
 
 @dp.message_handler(commands=['start', 'help'])
-async def echo(message: types.Message):
+async def welcome(message: types.Message):
     await message.answer('\n'.join([
         'Комманды:',
         '/categories - список доступных категорий'
@@ -32,7 +32,7 @@ async def echo(message: types.Message):
 
 
 @dp.message_handler(commands=['categories'])
-async def categories_list(message: types.Message):
+async def list_categories(message: types.Message):
     """Returns a list of categories"""
     categories = Category.objects.all()
     answer_message = '\n'.join([
