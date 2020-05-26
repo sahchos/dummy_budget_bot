@@ -152,7 +152,9 @@ async def on_shutdown(dp):
 
 
 if __name__ == '__main__':
-    db = connect(DB_NAME, host=DB_HOST)
+    db = connect(DB_NAME,
+                 host=f'{DB_HOST}?retryWrites=false',
+                 retryWrites=False)
     start_webhook(
         dispatcher=dp,
         webhook_path='',

@@ -68,6 +68,6 @@ if __name__ == '__main__':
     print("Setup started.")
     DB_NAME = os.environ.get('DB_NAME', 'budget_bot')
     DB_HOST = os.environ.get('MONGODB_URI', 'mongodb')
-    connect(DB_NAME, host=DB_HOST)
+    connect(DB_NAME, host=f'{DB_HOST}?retryWrites=false')
     _create_categories()
     print("Setup finished.")
