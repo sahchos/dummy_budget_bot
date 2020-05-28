@@ -79,7 +79,7 @@ async def get_last_expenses(message: types.Message):
     expenses = expense_service.get_last()
     await message.answer('\n'.join([
         'Последние расходы:\n',
-        *[f'{expense.date_str: {expense.category.name} - {expense.amount}}\n'
+        *[f'{expense.date_str}: {expense.category.name} - {expense.amount}\n'
           f'Удалить: /del{expense.id_str}\n'
           for expense in expenses]
     ]))
