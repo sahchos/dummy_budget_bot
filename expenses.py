@@ -22,6 +22,22 @@ class ExpenseService:
         amount: int
         category_text: str
 
+    @staticmethod
+    def get_last():
+        return Expense.objects.order_by('-date').limit(5)
+
+    def add(self, msg: str) -> Expense:
+        parsed_expense = self._parse_expense_msg(msg)
+        category = Category.get_category_by_text(parsed_expense.category_text)
+        return Expense.create(
+            amount=parsed_expense.amount,
+            category=category
+        )
+
+    @staticmethod
+    def delete(expense_id: str):
+        Expense.objects.filter(id=expense_id).delete()
+
     def _parse_expense_msg(self, msg: str) -> ParsedMessage:
         regexp_result = re.match(r"([\d ]+) (.*)", msg)
         if (not regexp_result or not regexp_result.group(0)
@@ -34,17 +50,6 @@ class ExpenseService:
         category_text = regexp_result.group(2).strip().lower()
 
         return self.ParsedMessage(amount=amount, category_text=category_text)
-
-    def add(self, msg: str) -> Expense:
-        parsed_expense = self._parse_expense_msg(msg)
-        category = Category.get_category_by_text(parsed_expense.category_text)
-        return Expense.create(
-            amount=parsed_expense.amount,
-            category=category
-        )
-
-    def delete(self, expense_id: str):
-        Expense.objects.filter(id=expense_id).delete()
 
 
 class ExpenseStats:

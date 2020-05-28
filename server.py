@@ -34,6 +34,7 @@ async def welcome(message: types.Message):
         'Комманды:',
         'Добавить расход: 1500 дом',
         '/categories - список доступных категорий',
+        '/last - последние расходы',
         '/today - статистика расходов за сегодня',
         '/today_pie - график расходов за сегодня (пирог)',
         '/prev_month - статистика расходов за прошлый месяц',
@@ -71,6 +72,17 @@ async def delete_expense(message: types.Message):
 
     expense_service.delete(expense_id)
     await message.answer('Удалено')
+
+
+@dp.message_handler(commands=['last'])
+async def get_last_expenses(message: types.Message):
+    expenses = expense_service.get_last()
+    await message.answer('\n'.join([
+        'Последние расходы:\n',
+        *[f'{expense.date_str: {expense.category.name} - {expense.amount}}\n'
+          f'Удалить: /del{expense.id_str}\n'
+          for expense in expenses]
+    ]))
 
 
 @dp.message_handler(commands=['today'])
@@ -131,7 +143,7 @@ async def add_expense(message: types.Message):
 
     await message.answer(f'Добавлено: {expense.amount}\n'
                          f'Категория: {expense.category.name}\n'
-                         f'Удалить: /del{expense.get_id_str()}')
+                         f'Удалить: /del{expense.id_str}')
 
 
 async def on_startup(dp):

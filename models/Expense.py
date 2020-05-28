@@ -15,8 +15,13 @@ class Expense(Document):
     raw_text = StringField()
     amount = IntField()
 
-    def get_id_str(self):
+    @property
+    def id_str(self):
         return self.id.replace('-', '_')
+
+    @property
+    def date_str(self):
+        return self.date.strftime('%Y-%m-%d')
 
     @classmethod
     def create(cls, **kwargs):
