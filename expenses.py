@@ -121,6 +121,11 @@ class ExpenseStats:
         plt.axis([0, 31, 0, self.MONTHLY_BUDGET])
         plt.ylabel('Гривен')
         plt.xlabel('День')
+
+        # for the current month add vertical line to determine today
+        if not prev:
+            plt.axvline(x=now.day, ymax=self.MONTHLY_BUDGET, color='r')
+
         img = io.BytesIO()
         plt.savefig(img, format='png')
         plt.close()
